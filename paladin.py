@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from pssh.clients import SSHClient
 import pssh.exceptions
 import simple_plugin_loader
@@ -15,7 +16,7 @@ import subprocess
 
 
 class Paladin(): 
-    PALADIN_PATH = f"{os.path.expanduser('~')}/.paladin/"
+    PALADIN_PATH = os.path.dirname(os.path.realpath(__file__))
 
     def __init__(self, config_file = None):
         self._parse_arguements()
@@ -34,7 +35,7 @@ class Paladin():
     def _load_plugins(self):
         self.plugins = {}
         loader = simple_plugin_loader.Loader()
-        plugins = loader.load_plugins(f"{self.PALADIN_PATH}plugins", Plugin)
+        plugins = loader.load_plugins(f"{self.PALADIN_PATH}/plugins", Plugin)
         for plugin in plugins.values():
             plugin(self)
 
@@ -63,11 +64,11 @@ class Paladin():
             self.key = args.i
 
     def _load_config(self, config_file):
-        config = configparser.ConfigParser()
+        config = configparser.SafeConfigParser(interpolation=configparser.BasicInterpolation())
         if not config_file:
-            config.read(f'{self.PALADIN_PATH}paladin.cfg')
+            config.read(f'{self.PALADIN_PATH}/paladin.cfg')
+
         self.prefix = config['DEFAULT']['prefix']
-        self.prefix_length = len(config['DEFAULT']['prefix'])
         self.remote_directory = config['DEFAULT']['remote_directory']
         self.private_key = config['AUTHENTICATION']['private_key']
         self.public_key = config['AUTHENTICATION']['public_key']
@@ -149,7 +150,7 @@ class Paladin():
         self.thread.start()
 
     def create_client(self):
-        COMMAND = ['/usr/bin/ssh', f'-i{self.private_key}', f'{self.user}@{self.host}', f'-p {self.port}']
+        COMMAND = ['/usr/bin/ssh', f'-i{self.private_key}', f'{self.user}@{self.host}', f'-p {self.port}', '-o StrictHostKeyChecking=accept-new']
         self._get_motd(COMMAND)
         if not self._try_login():
             self.printout('Max retries exceeded.')

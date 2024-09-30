@@ -1,6 +1,5 @@
 from plugins import Plugin
 import argparse
-from os.path import isfile
 
 class sftp(Plugin):
     name = 'sftp'
@@ -30,10 +29,14 @@ class sftp(Plugin):
             if args.download:
                 if not args.output:
                     args.output = args.file
-                self.paladin.client.copy_remote_file(f'{path}/{args.file}', args.output)
+                
+                self.paladin.client.scp_recv(f'{path}/{args.file}', args.output)
+                self.paladin.printout('Download complete!')
+
 
         except Exception as e:
             self.paladin.printout(f'{e.args[1]} was not found!')
+            return ''
 
         
 

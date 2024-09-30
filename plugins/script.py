@@ -23,7 +23,7 @@ class Script(Plugin):
         return f'bash {self.paladin.remote_directory}/{args.file}'
 
     def _startup(self):
-        config = configparser.ConfigParser()
+        config = configparser.SafeConfigParser(interpolation=configparser.ExtendedInterpolation())
         config.read('plugins/configs/script.cfg')
         self.path = config['DEFAULT']['script_path']
         self.debug = config['DEFAULT']['debug']
